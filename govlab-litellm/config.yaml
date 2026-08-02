@@ -1,0 +1,36 @@
+# GovLab LiteLLM — configuración del proxy
+#
+# Módulo 1: enrutamiento básico. Los modelos quedan declarados pero no se
+# invocan todavía; la conectividad real con proveedores es el Módulo 2.
+#
+# En ESTE fichero (lo lee LiteLLM) la sintaxis os.environ/VAR resuelve la
+# variable de entorno en tiempo de ejecución. No confundir con la
+# interpolación ${VAR} de docker-compose.yml.
+
+model_list:
+  - model_name: gpt-4o
+    litellm_params:
+      model: openai/gpt-4o
+      api_key: os.environ/OPENAI_API_KEY
+      rpm: 1000
+      tpm: 80000
+
+  - model_name: claude-3-5-sonnet
+    litellm_params:
+      model: anthropic/claude-3-5-sonnet-20241022
+      api_key: os.environ/ANTHROPIC_API_KEY
+      rpm: 500
+
+router_settings:
+  # Reparte las peticiones hacia el despliegue con menor latencia observada.
+  routing_strategy: latency-based-routing
+  num_retries: 3
+  # Segundos que un despliegue queda apartado tras fallar.
+  cooldown_time: 30
+
+litellm_settings:
+  # Descarta parámetros no soportados por el proveedor en vez de fallar.
+  drop_params: true
+  set_verbose: false
+  # Logs estructurados: necesarios para la trazabilidad del Módulo 5.
+  json_logs: true
