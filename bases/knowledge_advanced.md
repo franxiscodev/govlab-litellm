@@ -58,7 +58,12 @@ litellm_settings:
 
 ## 8. CONSULTAS SQL PARA AUDITORÍA DE CFO E INFORMES DE GASTO
 
-LiteLLM almacena todas las transacciones en PostgreSQL (`LiteLLM_SpendTable` y `LiteLLM_VerificationToken`).
+LiteLLM almacena todas las transacciones en PostgreSQL (`LiteLLM_SpendLogs` y `LiteLLM_VerificationToken`).
+
+> Nombres verificados contra el esquema real de `ghcr.io/berriai/litellm:main-latest`. La tabla de
+> transacciones es `LiteLLM_SpendLogs` — no existe ninguna `LiteLLM_SpendTable`. Los identificadores
+> en camelCase (`startTime`, `endTime`) requieren comillas dobles: sin ellas PostgreSQL los pliega a
+> minúsculas y la consulta falla.
 
 ### 8.1. Consulta 1: Gasto acumulado por Equipo (team_id) en los últimos 30 días
 
@@ -70,7 +75,7 @@ SELECT
     SUM(completion_tokens) AS total_completion_tokens,
     ROUND(SUM(spend)::numeric, 4) AS gasto_total_usd
 FROM
-    "LiteLLM_SpendTable"
+    "LiteLLM_SpendLogs"
 WHERE
     "startTime" >= NOW() - INTERVAL '30 days'
 GROUP BY
@@ -88,7 +93,7 @@ SELECT
     ROUND(AVG(spend)::numeric, 6) AS costo_promedio_por_peticion_usd,
     ROUND(SUM(spend)::numeric, 4) AS gasto_acumulado_usd
 FROM
-    "LiteLLM_SpendTable"
+    "LiteLLM_SpendLogs"
 GROUP BY
     model
 ORDER BY

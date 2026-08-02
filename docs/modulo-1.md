@@ -80,9 +80,14 @@ docker exec govlab-postgres psql -U litellm_admin -d litellm_db -c "\dt"
 docker exec govlab-redis redis-cli ping
 ```
 
-En el punto 6 deben aparecer, entre otras, `LiteLLM_SpendTable` (log de gasto por transacción) y
-`LiteLLM_VerificationToken` (virtual keys y presupuestos). Son las tablas sobre las que se
-construyen los informes de los Módulos 4 y 5.
+En el punto 6 deben aparecer unas 70 tablas, entre ellas `LiteLLM_SpendLogs` (una fila por
+transacción, con `spend`, `prompt_tokens`, `completion_tokens`, `team_id` y `model`) y
+`LiteLLM_VerificationToken` (virtual keys y presupuestos). Son la base de los informes de los
+Módulos 4 y 5.
+
+> Cuidado con el nombre: mucha documentación de terceros habla de `LiteLLM_SpendTable`. **Esa tabla
+> no existe.** La correcta es `LiteLLM_SpendLogs`. Además, sus columnas en camelCase (`startTime`,
+> `endTime`) hay que entrecomillarlas en SQL, o PostgreSQL las pliega a minúsculas y falla.
 
 ### Persistencia
 

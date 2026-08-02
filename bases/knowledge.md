@@ -137,7 +137,7 @@ litellm_settings:
 ## 3. MARCO DE GOBERNANZA, EU AI ACT Y PRIVACIDAD EN PYMES
 
 ### 3.1. Alineación con el EU AI Act
-1. **Transparencia y Trazabilidad (Art. 12 & 50):** Toda consulta y respuesta registrada en la tabla `LiteLLM_SpendTable` de PostgreSQL garantiza auditoría por el tiempo legal requerido (mínimo 6 meses).
+1. **Transparencia y Trazabilidad (Art. 12 & 50):** Toda consulta y respuesta registrada en la tabla `LiteLLM_SpendLogs` de PostgreSQL garantiza auditoría por el tiempo legal requerido (mínimo 6 meses).
 2. **Control Humano y Prevención de Riesgos:** Revocación instantánea de Virtual Keys ante usos anómalos.
 3. **Clasificación del Enrutamiento:**
    - **Datos Confidenciales / Sensibles:** Enrutamiento forzoso a modelos locales (Ollama) para cumplimiento de RGPD y secreto comercial.
