@@ -67,7 +67,7 @@ La regla quedó también en `CLAUDE.md`, en la sección de reglas de operación.
 ## Guardarraíl
 
 `sin_os_environ_en_compose()` en [`verify.sh`](../../govlab-litellm/scripts/verify.sh), añadido en
-`147e9f8`:
+`858ee03`:
 
 ```bash
 grep -nE '^[^#]*:[[:space:]]*os\.environ/' docker-compose.yml
