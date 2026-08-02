@@ -44,9 +44,21 @@ Hace falta al menos uno:
 
 Si nada alcanza el umbral, **no se dice nada**. El silencio es la respuesta correcta por defecto.
 
+### Filtrar antes de listar
+
+El umbral se aplica **a cada candidata por separado**, no al lote. Que la tarea haya generado un
+hallazgo grave no autoriza a colar detrás los menores "ya que estamos".
+
+Antes de escribir la propuesta, descartar todo lo que no supere el umbral **por sí solo**. Lo
+descartado no se menciona, ni siquiera como nota al margen: mencionarlo es proponerlo.
+
+Una lista de cuatro candidatas en la que solo una importa entrena al usuario a desconfiar de la
+lista entera, y a partir de ahí el sistema deja de servir.
+
 ### Forma de la propuesta
 
-Una lista de candidatas, una línea cada una, y esperar respuesta:
+Una lista de candidatas —**solo las que pasaron el filtro**—, una línea cada una, y esperar
+respuesta:
 
 ```text
 Cierro el Módulo 1. Tres hallazgos que creo que merecen ficha:
@@ -59,6 +71,28 @@ Cierro el Módulo 1. Tres hallazgos que creo que merecen ficha:
 ```
 
 El usuario puede aceptar todas, algunas o ninguna.
+
+### Una propuesta abierta bloquea el avance
+
+Si la respuesta **no se pronuncia sobre las candidatas** —cambia de tema, da una instrucción nueva,
+responde a otra cosa de la misma sesión— la propuesta sigue **abierta**. No se interpreta como un sí
+ni como un no.
+
+En ese caso: **volver a preguntar antes de empezar la siguiente tarea**, en una línea y sin repetir
+la lista entera.
+
+```text
+Antes de seguir: quedó sin responder si registro las 2 fichas que propuse. ¿Las hago?
+```
+
+Y solo entonces continuar. El motivo es que el material se degrada rápido: los detalles que hacen
+útil una ficha —la salida exacta, el comando que reveló la causa, por qué despistaba el síntoma—
+viven en el contexto de la sesión y se pierden al cambiar de tarea. Escrita al día siguiente, la
+ficha ya es un resumen de memoria.
+
+Esto **no contradice** la regla de una sola propuesta por tarea: la relanzada no es una propuesta
+nueva, es la misma esperando respuesta. Si tras la relanzada tampoco hay pronunciamiento, se toma
+como un no y se sigue sin volver a mencionarlo.
 
 ### Patrón que reaparece
 
