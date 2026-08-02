@@ -1,0 +1,15 @@
+# Secretos — nunca deben entrar al historial
+.env
+.env.*
+!.env.example
+
+# Python (UV)
+__pycache__/
+*.pyc
+.venv/
+.python-version
+
+# Logs y temporales
+*.log
+.DS_Store
+Thumbs.db
