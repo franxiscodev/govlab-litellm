@@ -1,0 +1,104 @@
+name: Verificación del stack
+
+# Levanta el stack completo en el runner y ejecuta scripts/verify.sh.
+# No usa secretos: el Módulo 1 no llama a proveedores, así que las claves de
+# OpenAI y Anthropic se quedan en placeholder. Las credenciales internas
+# (Postgres, master key, salt) se generan al vuelo y mueren con el runner.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verificar:
+    name: Stack en Docker Compose
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: govlab-litellm
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generar .env efímero
+        run: |
+          {
+            echo "POSTGRES_USER=litellm_admin"
+            echo "POSTGRES_PASSWORD=$(openssl rand -hex 16)"
+            echo "POSTGRES_DB=litellm_db"
+            echo "LITELLM_MASTER_KEY=sk-ci-$(openssl rand -hex 16)"
+            echo "LITELLM_SALT_KEY=sk-ci-salt-$(openssl rand -hex 24)"
+            echo "OPENAI_API_KEY=sk-placeholder-no-usado-en-modulo-1"
+            echo "ANTHROPIC_API_KEY=sk-ant-placeholder-no-usado-en-modulo-1"
+          } > .env
+
+      - name: Comprobar que .env.example no se ha desincronizado
+        run: |
+          # Si alguien añade una variable al compose y olvida documentarla en
+          # .env.example, el siguiente que clone el repo no podrá arrancar.
+          faltan=0
+          for var in $(grep -oE '\$\{[A-Z_]+\}' docker-compose.yml | tr -d '${}' | sort -u); do
+            if ! grep -q "^${var}=" .env.example; then
+              echo "::error::$var se usa en docker-compose.yml pero falta en .env.example"
+              faltan=1
+            fi
+          done
+          [ "$faltan" -eq 0 ] && echo "todas las variables del compose están en .env.example"
+          exit $faltan
+
+      - name: Levantar el stack
+        run: docker compose up -d
+
+      - name: Esperar a que el proxy esté sano
+        run: |
+          # El primer arranque ejecuta las migraciones Prisma: puede pasar del
+          # minuto. Se sale también en unhealthy o exited para no agotar el
+          # timeout del job cuando el fallo ya es definitivo.
+          for i in $(seq 1 60); do
+            salud=$(docker inspect --format '{{.State.Health.Status}}' govlab-proxy 2>/dev/null || echo ausente)
+            estado=$(docker inspect --format '{{.State.Status}}' govlab-proxy 2>/dev/null || echo ausente)
+            case "$salud" in
+              healthy)   echo "proxy sano tras ~$((i*5))s"; exit 0 ;;
+              unhealthy) echo "::error::el proxy quedó unhealthy"; exit 1 ;;
+            esac
+            [ "$estado" = "exited" ] && { echo "::error::el proxy terminó"; exit 1; }
+            sleep 5
+          done
+          echo "::error::el proxy no llegó a healthy en 300s"
+          exit 1
+
+      - name: Ejecutar verify.sh
+        run: ./scripts/verify.sh
+
+      - name: Comprobar persistencia tras reinicio
+        run: |
+          # La trazabilidad exigida por el EU AI Act no vale de nada si los
+          # datos se pierden al reiniciar. Valida los volúmenes nombrados.
+          docker compose down
+          docker compose up -d
+          for i in $(seq 1 60); do
+            [ "$(docker inspect --format '{{.State.Health.Status}}' govlab-proxy 2>/dev/null)" = "healthy" ] && break
+            sleep 5
+          done
+          ./scripts/verify.sh
+
+      - name: Logs en caso de fallo
+        if: failure()
+        run: |
+          echo "=== estado de los contenedores ==="
+          docker compose ps
+          echo "=== litellm ==="
+          docker compose logs --tail 120 litellm
+          echo "=== postgres ==="
+          docker compose logs --tail 40 db
+          echo "=== redis ==="
+          docker compose logs --tail 40 redis
+
+      - name: Limpiar
+        if: always()
+        run: docker compose down -v
