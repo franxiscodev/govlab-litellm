@@ -1,0 +1,12 @@
+# Normalizar finales de línea. Los scripts .sh y los ficheros que se montan
+# dentro de contenedores Linux DEBEN usar LF: con CRLF, bash falla con
+# "\r: command not found" y los YAML pueden romperse.
+* text=auto eol=lf
+
+*.sh   text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.md   text eol=lf
+
+*.png  binary
+*.jpg  binary
