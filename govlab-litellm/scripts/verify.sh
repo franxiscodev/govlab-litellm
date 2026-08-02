@@ -74,6 +74,16 @@ redis_conectado_al_proxy() {
   [ "$n" -gt 0 ] 2>/dev/null || { echo "el proxy no tiene ninguna conexión abierta con Redis"; return 1; }
 }
 
+# os.environ/VAR es sintaxis de LiteLLM y solo funciona dentro de config.yaml.
+# En la sección environment: de Docker asigna ese texto literal como valor, y
+# LiteLLM acaba enviándolo como credencial: el 401 resultante no señala la causa.
+# El ^[^#]* descarta los comentarios, que sí pueden mencionarla legítimamente.
+sin_os_environ_en_compose() {
+  local hits
+  hits=$(grep -nE '^[^#]*:[[:space:]]*os\.environ/' docker-compose.yml)
+  [ -z "$hits" ] || { echo "os.environ/ usado como valor en docker-compose.yml:"; echo "$hits"; return 1; }
+}
+
 echo
 echo "Verificación del stack GovLab LiteLLM"
 echo "-------------------------------------"
@@ -86,6 +96,7 @@ check "Tablas LiteLLM_* creadas en PostgreSQL" tablas_litellm
 check "Tabla de auditoría LiteLLM_SpendLogs"   tabla_spendlogs
 check "Redis responde PONG"                    redis_ping
 check "El proxy mantiene conexión con Redis"   redis_conectado_al_proxy
+check "Sin os.environ/ en docker-compose.yml"  sin_os_environ_en_compose
 echo
 
 if [ "$FALLOS" -eq 0 ]; then
