@@ -27,6 +27,10 @@ router_settings:
   num_retries: 3
   # Segundos que un despliegue queda apartado tras fallar.
   cooldown_time: 30
+  # Estado compartido del router en Redis: contadores de RPM/TPM y latencias.
+  # Sin esta línea LiteLLM no abre ninguna conexión con Redis, y los límites
+  # quedarían solo en memoria del proceso (se pierden al reiniciar).
+  redis_url: os.environ/REDIS_URL
 
 litellm_settings:
   # Descarta parámetros no soportados por el proveedor en vez de fallar.
