@@ -63,6 +63,16 @@ Los servicios que aparecen a mitad del roadmap (Ollama en M2, Presidio en M5) se
 **Python**
 - Gestor de paquetes: **UV** (`uv run`, `uv add`, `uv sync`). No usar pip, poetry ni pipenv.
 
+**Lecciones aprendidas**
+- Los hallazgos no obvios se registran en [docs/lecciones-aprendidas/](docs/lecciones-aprendidas/),
+  siguiendo la skill [lecciones-aprendidas](.claude/skills/lecciones-aprendidas/SKILL.md).
+- **Solo se proponen al cerrar trabajo grande** — un módulo, una feature con varios commits, una
+  sesión larga de depuración. Nunca a mitad de una tarea, y como mucho una propuesta por tarea.
+- **Nunca escribir una ficha sin confirmación explícita.** Se presenta la lista de candidatas y se
+  espera respuesta.
+- La skill está en pruebas: si un criterio falla en la práctica, decirlo y proponer la mejora en
+  lugar de forzar la plantilla.
+
 **Git**
 - Ver la skill [git-conventional-commits](.claude/skills/git-conventional-commits/SKILL.md).
 - Rama `feature/*` por módulo, Conventional Commits, commits atómicos, tag al cerrar el módulo.
