@@ -57,8 +57,10 @@ services:
       REDIS_URL: "redis://redis:6379"
       LITELLM_MASTER_KEY: "sk-govlab-master-key-2026"
       LITELLM_SALT_KEY: "sk-govlab-encryption-salt-must-be-long-and-static"
-      OPENAI_API_KEY: "os.environ/OPENAI_API_KEY"
-      ANTHROPIC_API_KEY: "os.environ/ANTHROPIC_API_KEY"
+      # Valor real inyectado desde .env. La sintaxis os.environ/… pertenece
+      # solo a config.yaml: aquí asignaría ese texto literal como credencial.
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
     command: ["--config", "/app/config.yaml", "--port", "4000", "--detailed_debug"]
     depends_on:
       db:
@@ -101,7 +103,7 @@ model_list:
   - model_name: llama3-local
     litellm_params:
       model: ollama_chat/llama3.3
-      api_base: [http://host.docker.internal:11434](http://host.docker.internal:11434)
+      api_base: http://host.docker.internal:11434
       rpm: 200
 
 router_settings:
