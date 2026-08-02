@@ -66,12 +66,16 @@ redis_ping() {
 
 # Que Redis esté vivo no implica que el proxy lo esté usando: sin redis_url en
 # router_settings, LiteLLM arranca sano y nunca abre la conexión, dejando los
-# límites RPM/TPM solo en memoria. Las conexiones del proxy llegan desde la red
-# de Docker, no desde loopback (que es por donde entra este propio redis-cli).
+# límites RPM/TPM solo en memoria.
+#
+# El proxy conecta desde la red de Docker; este propio redis-cli entra por
+# loopback. Se excluye loopback en vez de exigir un rango concreto: la subred
+# la asigna Docker y varía entre máquinas y runners de CI.
 redis_conectado_al_proxy() {
   local n
-  n=$(docker exec govlab-redis redis-cli client list 2>&1 | grep -c 'addr=172\.')
-  [ "$n" -gt 0 ] 2>/dev/null || { echo "el proxy no tiene ninguna conexión abierta con Redis"; return 1; }
+  n=$(docker exec govlab-redis redis-cli client list 2>&1 \
+        | grep -oE 'addr=[^ ]+' | grep -vcE 'addr=(127\.0\.0\.1|::1|\[::1\])')
+  [ "${n:-0}" -gt 0 ] 2>/dev/null || { echo "el proxy no tiene ninguna conexión abierta con Redis"; return 1; }
 }
 
 # os.environ/VAR es sintaxis de LiteLLM y solo funciona dentro de config.yaml.
